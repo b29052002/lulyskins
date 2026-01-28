@@ -68,18 +68,17 @@
         .logo {
             width: 180px;
             height: 180px;
-            background: linear-gradient(135deg, var(--bright-blue), var(--electric-blue));
-            border-radius: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Bebas Neue', cursive;
-            font-size: 4rem;
-            color: white;
-            font-weight: 700;
-            letter-spacing: 3px;
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
             position: relative;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 20px 60px rgba(59, 130, 246, 0.4));
         }
 
         .logo::before {
@@ -473,7 +472,10 @@
 <body>
     <section class="hero" id="hero">
         <div class="logo-container">
-            <div class="logo">LULY</div>
+            <div class="logo">
+                <!-- SUBSTITUA "logo.png" pelo nome do arquivo da sua logo -->
+                <img src="logo.png" alt="Luly Skins Logo">
+            </div>
         </div>
         <div class="hero-content">
             <h1 class="hero-title">O Melhor Jeito de Comprar e Vender Skins</h1>
@@ -491,8 +493,9 @@
             <div class="step-number">01</div>
             <h2 class="step-title">Quero Comprar Skins</h2>
             <p class="step-description">
-                Encontre as melhores skins pelo menor preço do mercado. Atendimento rápido, confiável e seguro. 
-                Estoque sempre atualizado com as skins mais desejadas!
+                Vendo todas as skins que estão no meu inventário pelo preço mais barato da internet. 
+                Além disso, qualquer skin que você quiser no mundo, consigo pra ti em minutos, no máximo 
+                algumas horas direto na sua conta pelo preço de custo dela, sem taxa nenhuma.
             </p>
             <a href="https://wa.me/5511999999999?text=Olá! Vi o site e quero comprar skins 🎮" class="step-button">Falar no WhatsApp</a>
         </div>
@@ -501,20 +504,34 @@
             <div class="step-number">02</div>
             <h2 class="step-title">Quero Vender Skins</h2>
             <p class="step-description">
-                Venda suas skins com segurança e receba rápido! Melhor cotação do mercado, pagamento instantâneo 
-                e processo 100% transparente. Transforme suas skins em dinheiro agora!
+                Compro suas skins à vista com total segurança e garantia. Skins avulsas e inventários completos, 
+                com facilidade te ofereço sempre duas propostas de valores que sejam justos e tragam segurança, 
+                praticidade e facilidade. Você vai só aceitar a proposta e ficar tranquilo sabendo que vai 
+                receber o dinheiro no PIX.
             </p>
             <a href="https://wa.me/5511999999999?text=Olá! Quero vender minhas skins e receber uma cotação 💰" class="step-button">Solicitar Cotação</a>
         </div>
 
         <div class="step" data-step="3">
             <div class="step-number">03</div>
+            <h2 class="step-title">Quero Fazer Upgrade de Skins</h2>
+            <p class="step-description">
+                Pra fazer upgrade nas suas skins, vai ser muito vantajoso. A mesma praticidade de sempre, 
+                a gente cota quanto ficaria a diferença sem nenhum compromisso e te garanto que quase sempre 
+                o valor comigo vai ser melhor que qualquer site de troca da internet. Você entrega suas skins, 
+                paga a diferença e sai com a skin dos seus sonhos, tudo na mesma hora.
+            </p>
+            <a href="https://wa.me/5511999999999?text=Olá! Quero fazer upgrade nas minhas skins 🔥" class="step-button">Solicitar Upgrade</a>
+        </div>
+
+        <div class="step" data-step="4">
+            <div class="step-number">04</div>
             <h2 class="step-title">Quero Participar de Sorteios Exclusivos</h2>
             <p class="step-description">
-                Entre para o grupo VIP e participe de sorteios exclusivos de skins! Promoções especiais, 
-                rifas com preços incríveis e chances reais de ganhar as melhores skins. Não perca essa oportunidade!
+                Entre em nossa comunidade que rola vários sorteios! Promoções especiais 
+                e chances reais de ganhar as melhores skins. Não perca essa oportunidade!
             </p>
-            <a href="https://chat.whatsapp.com/CODIGO_DO_GRUPO" class="step-button">Entrar no Grupo VIP</a>
+            <a href="https://chat.whatsapp.com/CODIGO_DO_GRUPO" class="step-button">Entrar na Comunidade</a>
         </div>
     </section>
 
@@ -564,7 +581,8 @@
         const stepButtons = document.querySelectorAll('.step-button');
         if (stepButtons[0]) stepButtons[0].href = `https://wa.me/${whatsappNumber}?text=Olá! Vi o site e quero comprar skins 🎮`;
         if (stepButtons[1]) stepButtons[1].href = `https://wa.me/${whatsappNumber}?text=Olá! Quero vender minhas skins e receber uma cotação 💰`;
-        if (stepButtons[2]) stepButtons[2].href = whatsappGroupLink;
+        if (stepButtons[2]) stepButtons[2].href = `https://wa.me/${whatsappNumber}?text=Olá! Quero fazer upgrade nas minhas skins 🔥`;
+        if (stepButtons[3]) stepButtons[3].href = whatsappGroupLink;
 
         const feedbacks = [
             { username: "matheus_felippp", text: "Rápido é confiável, recomendo demais!!" },
