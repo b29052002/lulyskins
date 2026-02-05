@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== MERCADO PAGO =====
 const client = new MercadoPagoConfig({
-  accessToken: 'APP_USR-861897508909678-020211-124d4fa380e582c73f57be0350a9945a-136456359'
+  accessToken: ''
 });
 const payment = new Payment(client);
 
