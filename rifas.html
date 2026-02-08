@@ -1538,6 +1538,11 @@
 
         function closeAdminPanel() {
             document.getElementById('adminPanel').classList.remove('active');
+            
+            // Parar atualização automática
+            if (window.adminUpdateInterval) {
+                clearInterval(window.adminUpdateInterval);
+            }
         }
 
         async function loadAdminData() {
@@ -1573,6 +1578,15 @@
             togglePromoFields();
             await loadSales();
             updateAdminStats();
+
+            // Atualizar vendas automaticamente a cada 10 segundos
+            if (window.adminUpdateInterval) {
+                clearInterval(window.adminUpdateInterval);
+            }
+            window.adminUpdateInterval = setInterval(async () => {
+                await loadSales();
+                updateAdminStats();
+            }, 10000); // 10 segundos
         }
 
         function togglePromoFields() {
@@ -1787,11 +1801,39 @@
                     return;
                 }
 
-                salesList.innerHTML = data.map(sale => `
+                // Filtrar vendas válidas (aprovadas OU reservadas há menos de 5 min)
+                const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+                const validSales = data.filter(sale => {
+                    if (sale.payment_status === 'approved') {
+                        return true; // Sempre mostrar aprovadas
+                    }
+                    if (sale.payment_status === 'reserved') {
+                        const saleDate = new Date(sale.created_at);
+                        return saleDate >= fiveMinutesAgo; // Só mostrar se < 5 min
+                    }
+                    return false; // Ignorar outros status
+                });
+
+                if (validSales.length === 0) {
+                    salesList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.4);">Nenhuma venda ativa</p>';
+                    return;
+                }
+
+                salesList.innerHTML = validSales.map(sale => {
+                    // Calcular tempo restante para reservas
+                    let timeRemaining = '';
+                    if (sale.payment_status === 'reserved') {
+                        const saleDate = new Date(sale.created_at);
+                        const expiresAt = new Date(saleDate.getTime() + 5 * 60 * 1000);
+                        const minutesLeft = Math.ceil((expiresAt - new Date()) / 60000);
+                        timeRemaining = ` (${minutesLeft} min restante${minutesLeft !== 1 ? 's' : ''})`;
+                    }
+
+                    return `
                     <div class="sale-item">
                         <div class="sale-header">
                             <span>${sale.buyer_name}</span>
-                            <span>${sale.payment_status === 'approved' ? '✅ Pago' : '⏳ Pendente'}</span>
+                            <span>${sale.payment_status === 'approved' ? '✅ Pago' : `⏳ Pendente${timeRemaining}`}</span>
                         </div>
                         <div>📱 ${sale.buyer_phone}</div>
                         <div>💰 R$ ${sale.total_amount.toFixed(2)}</div>
@@ -1809,7 +1851,8 @@
                             </div>
                         ` : ''}
                     </div>
-                `).join('');
+                `;
+                }).join('');
             } catch (error) {
                 console.error('Erro:', error);
             }
