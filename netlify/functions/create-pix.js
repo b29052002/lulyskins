@@ -72,7 +72,7 @@ exports.handler = async (event) => {
     // ===============================
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN || 
-        ''
+        'APP_USR-2110354351670786-020516-b41ee554dbbbbc79c6a32ca9bb826019-442073802110354351670786t2bD4H7rPRsoBRWfEkw6ps88MDd8BHK4'
     });
 
     const payment = new Payment(client);
