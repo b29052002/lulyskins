@@ -18,95 +18,82 @@ exports.handler = async (event, context) => {
 
     // Handle OPTIONS
     if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 200,
-            headers,
-            body: ''
-        };
+        return { statusCode: 200, headers, body: '' };
     }
 
     try {
-        console.log('🔔 Webhook recebido:', {
-            method: event.httpMethod,
-            queryParams: event.queryStringParameters
-        });
+        console.log('🔔 ===== WEBHOOK RECEBIDO =====');
+        console.log('📋 Method:', event.httpMethod);
+        console.log('📋 Headers:', JSON.stringify(event.headers, null, 2));
+        console.log('📋 Query Params:', JSON.stringify(event.queryStringParameters, null, 2));
+        console.log('📋 Body:', event.body);
 
-        // Mercado Pago envia notificações via query params
+        let paymentId = null;
+        let notificationType = null;
+
+        // MÉTODO 1: Via Query Params (formato antigo)
         const { type, data } = event.queryStringParameters || {};
+        if (type && data) {
+            console.log('📦 Notificação via Query Params (antigo)');
+            notificationType = type;
+            try {
+                const parsedData = JSON.parse(data);
+                paymentId = parsedData.id;
+            } catch (e) {
+                paymentId = data;
+            }
+        }
 
-        console.log('📦 Tipo de notificação:', type);
-        console.log('📦 Data ID:', data ? JSON.parse(data).id : 'N/A');
+        // MÉTODO 2: Via Body POST (formato novo - v1)
+        if (!paymentId && event.body) {
+            try {
+                const body = JSON.parse(event.body);
+                console.log('📦 Body Parsed:', JSON.stringify(body, null, 2));
+                
+                // Formato 1: { type: "payment", data: { id: "123" } }
+                if (body.type && body.data && body.data.id) {
+                    console.log('📦 Notificação via Body - Formato 1');
+                    notificationType = body.type;
+                    paymentId = body.data.id;
+                }
+                
+                // Formato 2: { action: "payment.updated", data: { id: "123" } }
+                else if (body.action && body.data && body.data.id) {
+                    console.log('📦 Notificação via Body - Formato 2');
+                    notificationType = 'payment';
+                    paymentId = body.data.id;
+                }
+                
+                // Formato 3: { id: "123", topic: "payment" }
+                else if (body.id && body.topic) {
+                    console.log('📦 Notificação via Body - Formato 3');
+                    notificationType = body.topic;
+                    paymentId = body.id;
+                }
+            } catch (e) {
+                console.error('⚠️ Erro ao parsear body:', e);
+            }
+        }
+
+        console.log('🔍 Payment ID extraído:', paymentId);
+        console.log('🔍 Tipo de notificação:', notificationType);
+
+        // Se não encontrou payment ID, retornar ok mas logar
+        if (!paymentId) {
+            console.log('⚠️ Payment ID não encontrado. Ignorando notificação.');
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ 
+                    success: true,
+                    message: 'Notificação recebida mas sem payment ID'
+                })
+            };
+        }
 
         // Verificar se é notificação de pagamento
-        if (type === 'payment') {
-            const paymentId = JSON.parse(data).id;
-            
-            console.log('💳 Consultando pagamento:', paymentId);
-
-            // Buscar detalhes do pagamento no Mercado Pago
-            const response = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-                headers: {
-                    'Authorization': `Bearer ${ACCESS_TOKEN}`
-                }
-            });
-
-            const payment = await response.json();
-
-            console.log('📥 Pagamento consultado:', {
-                id: payment.id,
-                status: payment.status,
-                external_reference: payment.external_reference
-            });
-
-            // Se pagamento foi aprovado
-            if (payment.status === 'approved') {
-                const saleId = payment.external_reference;
-
-                console.log('✅ Pagamento aprovado! Atualizando venda:', saleId);
-
-                // Atualizar status da venda no Supabase
-                const { data: updateData, error: updateError } = await supabase
-                    .from('raffle_sales')
-                    .update({ 
-                        payment_status: 'approved',
-                        payment_id: payment.id,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', saleId)
-                    .select();
-
-                if (updateError) {
-                    console.error('❌ Erro ao atualizar Supabase:', updateError);
-                    throw updateError;
-                }
-
-                console.log('✅ Venda atualizada com sucesso:', updateData);
-
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ 
-                        success: true,
-                        message: 'Pagamento processado',
-                        sale_id: saleId
-                    })
-                };
-            } else {
-                console.log('⏳ Pagamento ainda não aprovado:', payment.status);
-                
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ 
-                        success: true,
-                        message: 'Pagamento em processamento',
-                        status: payment.status
-                    })
-                };
-            }
-        } else {
-            console.log('ℹ️ Tipo de notificação ignorado:', type);
-            
+        if (notificationType !== 'payment') {
+            console.log('ℹ️ Tipo de notificação ignorado:', notificationType);
             return {
                 statusCode: 200,
                 headers,
@@ -117,15 +104,100 @@ exports.handler = async (event, context) => {
             };
         }
 
+        console.log('💳 Consultando pagamento no Mercado Pago:', paymentId);
+
+        // Buscar detalhes do pagamento no Mercado Pago
+        const mpResponse = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${ACCESS_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!mpResponse.ok) {
+            console.error('❌ Erro ao consultar Mercado Pago:', mpResponse.status);
+            const errorText = await mpResponse.text();
+            console.error('❌ Response:', errorText);
+            throw new Error(`MP API error: ${mpResponse.status}`);
+        }
+
+        const payment = await mpResponse.json();
+
+        console.log('📥 Pagamento consultado:');
+        console.log('   ID:', payment.id);
+        console.log('   Status:', payment.status);
+        console.log('   External Reference:', payment.external_reference);
+        console.log('   Amount:', payment.transaction_amount);
+
+        // Se pagamento foi aprovado
+        if (payment.status === 'approved') {
+            const saleId = payment.external_reference;
+
+            if (!saleId) {
+                console.error('❌ External reference vazio!');
+                return {
+                    statusCode: 400,
+                    headers,
+                    body: JSON.stringify({ error: 'Sale ID not found in external_reference' })
+                };
+            }
+
+            console.log('✅ Pagamento APROVADO! Atualizando venda:', saleId);
+
+            // Atualizar status da venda no Supabase
+            const { data: updateData, error: updateError } = await supabase
+                .from('raffle_sales')
+                .update({ 
+                    payment_status: 'approved',
+                    payment_id: payment.id,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', saleId)
+                .select();
+
+            if (updateError) {
+                console.error('❌ Erro ao atualizar Supabase:', updateError);
+                throw updateError;
+            }
+
+            console.log('✅ Venda atualizada com sucesso!');
+            console.log('✅ Data:', JSON.stringify(updateData, null, 2));
+
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ 
+                    success: true,
+                    message: 'Pagamento processado com sucesso',
+                    sale_id: saleId,
+                    payment_id: payment.id
+                })
+            };
+        } else {
+            console.log('⏳ Pagamento ainda não aprovado. Status:', payment.status);
+            
+            return {
+                statusCode: 200,
+                headers,
+                body: JSON.stringify({ 
+                    success: true,
+                    message: 'Pagamento em processamento',
+                    status: payment.status
+                })
+            };
+        }
+
     } catch (error) {
-        console.error('❌ Erro no webhook:', error);
+        console.error('💥 ERRO CRÍTICO no webhook:', error);
+        console.error('💥 Stack:', error.stack);
         
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 error: error.message,
-                details: error.toString()
+                stack: error.stack
             })
         };
     }
