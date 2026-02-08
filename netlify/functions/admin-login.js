@@ -1,14 +1,8 @@
-const { createClient } = require('@supabase/supabase-js');
+const crypto = require('crypto');
 
-// ⚠️ ESTAS credenciais ficam SEGURAS no servidor (Netlify)
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nlpjugpeexxgtmrcrkwx.supabase.co';
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY; // Service Role Key (não a anon!)
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH; // Hash da senha (não a senha!)
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
 
-// Criar cliente com SERVICE KEY (permissões totais)
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -17,7 +11,7 @@ exports.handler = async (event, context) => {
     };
 
     if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
+        return { statusCode: 200, headers };
     }
 
     if (event.httpMethod !== 'POST') {
@@ -25,6 +19,15 @@ exports.handler = async (event, context) => {
             statusCode: 405,
             headers,
             body: JSON.stringify({ error: 'Method not allowed' })
+        };
+    }
+
+    if (!ADMIN_PASSWORD_HASH) {
+        console.error("ADMIN_PASSWORD_HASH not set");
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: 'Server configuration error' })
         };
     }
 
@@ -39,14 +42,14 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Verificar senha usando hash simples
-        const crypto = require('crypto');
-        const hash = crypto.createHash('sha256').update(password).digest('hex');
+        // Hash SHA256
+        const hash = crypto
+            .createHash('sha256')
+            .update(password)
+            .digest('hex');
 
         if (hash !== ADMIN_PASSWORD_HASH) {
-            // Log de tentativa de acesso
-            console.log('❌ Tentativa de login falhou');
-            
+            console.log('❌ Login failed');
             return {
                 statusCode: 401,
                 headers,
@@ -54,24 +57,24 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Gerar token de sessão (válido por 1 hora)
-        const sessionToken = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+        // Criar token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = Date.now() + 60 * 60 * 1000; // 1h
 
-        console.log('✅ Login bem-sucedido');
+        console.log('✅ Admin login');
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                token: sessionToken,
-                expiresAt: expiresAt.toISOString()
+                token,
+                expiresAt
             })
         };
 
     } catch (error) {
-        console.error('❌ Erro no login:', error);
+        console.error(error);
         return {
             statusCode: 500,
             headers,
