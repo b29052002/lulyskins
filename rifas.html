@@ -8,8 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 🔐 Arquivo de configuração com credenciais -->
     <script src="config.js"></script>
     
     <style>
@@ -969,15 +967,11 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔐 CONFIGURAÇÕES CARREGADAS DE config.js
-        // ==========================================
         const SUPABASE_URL = window.CONFIG.SUPABASE_URL;
         const SUPABASE_KEY = window.CONFIG.SUPABASE_KEY;
         const MERCADOPAGO_PUBLIC_KEY = window.CONFIG.MERCADOPAGO_PUBLIC_KEY;
         const CLIENT_EMAIL = window.CONFIG.CLIENT_EMAIL;
         const ADMIN_PASSWORD = window.CONFIG.ADMIN_PASSWORD;
-        // ==========================================
 
         let supabaseClient = null;
         
@@ -1488,14 +1482,11 @@
         }
 
         function showPaymentSuccess(numbers) {
-            // Esconder tela de loading e QR Code
             document.getElementById('pixLoading').style.display = 'none';
             document.getElementById('pixContent').style.display = 'none';
             
-            // Mostrar tela de sucesso
             document.getElementById('paymentSuccess').style.display = 'block';
             
-            // Mostrar números comprados
             const numbersContainer = document.getElementById('purchasedNumbers');
             numbersContainer.innerHTML = numbers
                 .sort((a, b) => a - b)
@@ -1523,7 +1514,6 @@
             updateNumbersDisplay();
             updateCheckout();
             
-            // Recarregar página após 1 segundo
             setTimeout(() => {
                 location.reload();
             }, 500);
@@ -1543,7 +1533,6 @@
         function closeAdminPanel() {
             document.getElementById('adminPanel').classList.remove('active');
             
-            // Parar atualização automática
             if (window.adminUpdateInterval) {
                 clearInterval(window.adminUpdateInterval);
             }
@@ -1583,14 +1572,13 @@
             await loadSales();
             updateAdminStats();
 
-            // Atualizar vendas automaticamente a cada 10 segundos
             if (window.adminUpdateInterval) {
                 clearInterval(window.adminUpdateInterval);
             }
             window.adminUpdateInterval = setInterval(async () => {
                 await loadSales();
                 updateAdminStats();
-            }, 10000); // 10 segundos
+            }, 10000);
         }
 
         function togglePromoFields() {
@@ -1818,9 +1806,9 @@
                         const saleDate = new Date(sale.created_at);
                         const minutesAgo = (new Date() - saleDate) / 60000;
                         console.log(`📊 Venda ${sale.buyer_name}: ${minutesAgo.toFixed(1)} minutos atrás`);
-                        return saleDate >= fiveMinutesAgo; // Só mostrar se < 5 min
+                        return saleDate >= fiveMinutesAgo; 
                     }
-                    return false; // Ignorar outros status
+                    return false; 
                 });
 
                 if (validSales.length === 0) {
@@ -1829,7 +1817,6 @@
                 }
 
                 salesList.innerHTML = validSales.map(sale => {
-                    // Calcular tempo restante para reservas
                     let timeRemaining = '';
                     if (sale.payment_status === 'reserved') {
                         const saleDate = new Date(sale.created_at);
@@ -1896,7 +1883,6 @@
             try {
                 console.log('🔍 Verificando conflitos para venda:', saleId);
 
-                // Buscar dados da venda
                 const { data: sale, error: saleError } = await supabaseClient
                     .from('raffle_sales')
                     .select('*')
@@ -1905,19 +1891,17 @@
 
                 if (saleError) throw saleError;
 
-                // Buscar números já vendidos/reservados (excluindo esta venda)
                 const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
                 
                 const { data: otherSales, error: checkError } = await supabaseClient
                     .from('raffle_sales')
                     .select('numbers, payment_status')
                     .eq('raffle_id', currentRaffle.id)
-                    .neq('id', saleId) // Excluir esta venda
+                    .neq('id', saleId) 
                     .or(`payment_status.eq.approved,and(payment_status.eq.reserved,created_at.gte.${fiveMinutesAgo})`);
 
                 if (checkError) throw checkError;
 
-                // Criar set de números ocupados
                 const occupiedNumbers = new Set();
                 if (otherSales && otherSales.length > 0) {
                     otherSales.forEach(s => {
@@ -1926,8 +1910,6 @@
                         }
                     });
                 }
-
-                // Verificar conflitos
                 const requestedNumbers = sale.numbers;
                 const conflictNumbers = requestedNumbers.filter(num => occupiedNumbers.has(num));
                 const freeRequestedNumbers = requestedNumbers.filter(num => !occupiedNumbers.has(num));
@@ -1936,7 +1918,6 @@
                 console.log('❌ Conflitos:', conflictNumbers);
                 console.log('✅ Livres solicitados:', freeRequestedNumbers);
 
-                // SEM CONFLITOS - Aprovar direto
                 if (conflictNumbers.length === 0) {
                     if (!confirm('✅ Aprovar pagamento?\n\nNenhum conflito detectado.')) return;
 
@@ -1952,7 +1933,6 @@
                     return;
                 }
 
-                // COM CONFLITOS - Verificar números disponíveis
                 const totalNumbers = currentRaffle.total_numbers || 100;
                 const availableNumbers = [];
                 for (let i = 1; i <= totalNumbers; i++) {
@@ -1966,7 +1946,7 @@
                 const needsRealocation = conflictNumbers.length;
                 const canReallocate = availableNumbers.length >= needsRealocation;
 
-                // Montar mensagem de conflito
+
                 let message = `⚠️ CONFLITO DETECTADO!\n\n`;
                 message += `Cliente: ${sale.buyer_name}\n`;
                 message += `Telefone: ${sale.buyer_phone}\n`;
@@ -2006,7 +1986,7 @@
                     }
                 }
 
-                // Mostrar modal customizado
+                
                 showConflictModal(sale, freeRequestedNumbers, conflictNumbers, availableNumbers, canReallocate);
 
             } catch (error) {
@@ -2147,7 +2127,6 @@
             try {
                 const needsRealocation = conflictNumbers.length;
                 
-                // Remover números já mantidos dos disponíveis para evitar duplicatas
                 const availableForReallocation = availableNumbers.filter(num => !freeNumbers.includes(num));
                 
                 if (availableForReallocation.length < needsRealocation) {
@@ -2155,11 +2134,9 @@
                     return;
                 }
                 
-                // Selecionar números aleatórios ÚNICOS dos disponíveis
                 const shuffled = [...availableForReallocation].sort(() => Math.random() - 0.5);
                 const newNumbers = shuffled.slice(0, needsRealocation);
                 
-                // Combinar e GARANTIR que não há duplicatas
                 const finalNumbers = [...new Set([...freeNumbers, ...newNumbers])].sort((a, b) => a - b);
 
                 // Verificação de segurança
@@ -2225,7 +2202,6 @@
 
                 if (!confirm(confirmMsg)) return;
 
-                // Deletar venda
                 const { error } = await supabaseClient
                     .from('raffle_sales')
                     .delete()
@@ -2246,7 +2222,6 @@
             try {
                 console.log('🔍 Verificando conflitos automáticos para:', saleId);
 
-                // Buscar dados da venda
                 const { data: sale, error: saleError } = await supabaseClient
                     .from('raffle_sales')
                     .select('*')
@@ -2255,14 +2230,13 @@
 
                 if (saleError) throw saleError;
 
-                // Buscar TODAS as outras vendas aprovadas/reservadas
                 const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
                 
                 const { data: otherSales, error: checkError } = await supabaseClient
                     .from('raffle_sales')
                     .select('numbers, payment_status, id')
                     .eq('raffle_id', currentRaffle.id)
-                    .neq('id', saleId) // Excluir esta venda
+                    .neq('id', saleId)
                     .or(`payment_status.eq.approved,and(payment_status.eq.reserved,created_at.gte.${fiveMinutesAgo})`);
 
                 if (checkError) throw checkError;
@@ -2292,13 +2266,10 @@
                 console.log('❌ Conflitos externos:', conflictNumbers);
                 console.log('✅ Livres:', freeNumbers);
 
-                // SEM CONFLITOS E SEM DUPLICATAS
                 if (conflictNumbers.length === 0 && !hasDuplicates) {
                     alert(`✅ Nenhum problema detectado!\n\nNúmeros: ${uniqueNumbers.join(', ')}\n\nTudo OK! 👍`);
                     return;
                 }
-
-                // TEM PROBLEMAS - Verificar números disponíveis
                 const totalNumbers = currentRaffle.total_numbers || 100;
                 const availableNumbers = [];
                 for (let i = 1; i <= totalNumbers; i++) {
@@ -2310,7 +2281,6 @@
                 const totalProblems = hasDuplicates ? (saleNumbers.length - uniqueNumbers.length + conflictNumbers.length) : conflictNumbers.length;
                 const canReallocate = availableNumbers.length >= totalProblems;
 
-                // Montar modal de verificação
                 showAutoCheckModal(sale, uniqueNumbers, conflictNumbers, availableNumbers, canReallocate, hasDuplicates, saleNumbers);
 
             } catch (error) {
@@ -2419,11 +2389,9 @@
 
         async function executeAutoReallocate(saleId, freeNumbers, needsNew, availableNumbers) {
             try {
-                // Selecionar números aleatórios ÚNICOS
                 const shuffled = [...availableNumbers].sort(() => Math.random() - 0.5);
                 const newNumbers = shuffled.slice(0, needsNew);
                 
-                // Combinar números mantidos + novos e GARANTIR ÚNICOS
                 const finalNumbers = [...new Set([...freeNumbers, ...newNumbers])].sort((a, b) => a - b);
 
                 if (!confirm(`🔄 CONFIRMAR REALOCAÇÃO?\n\nNúmeros mantidos: ${freeNumbers.join(', ')}\n\nNovos números: ${newNumbers.join(', ')}\n\nTOTAL FINAL (${finalNumbers.length}):\n${finalNumbers.join(', ')}\n\n⚠️ O cliente será notificado dos novos números!`)) {
