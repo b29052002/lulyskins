@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 🔐 Arquivo de configuração com credenciais -->
+    <script src="config.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -966,13 +970,13 @@
 
     <script>
         // ==========================================
-        // 🔐 CONFIGURAÇÃO DO SUPABASE E MERCADO PAGO
+        // 🔐 CONFIGURAÇÕES CARREGADAS DE config.js
         // ==========================================
-        const SUPABASE_URL = 'https://nlpjugpeexxgtmrcrkwx.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5scGp1Z3BlZXh4Z3RtcmNya3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMTI1MTgsImV4cCI6MjA4NTg4ODUxOH0.44yZ8FSVx2H0gT-jZ-dpPxK_VH9vCwBQ28v36i0PXHA';
-        const MERCADOPAGO_PUBLIC_KEY = 'APP_USR-8ba3fd90-dad1-4b15-a0de-50521882f6c7';
-        const CLIENT_EMAIL = 'yurimg31@gmail.com';
-        const ADMIN_PASSWORD = 'lulyskins10';
+        const SUPABASE_URL = window.CONFIG.SUPABASE_URL;
+        const SUPABASE_KEY = window.CONFIG.SUPABASE_KEY;
+        const MERCADOPAGO_PUBLIC_KEY = window.CONFIG.MERCADOPAGO_PUBLIC_KEY;
+        const CLIENT_EMAIL = window.CONFIG.CLIENT_EMAIL;
+        const ADMIN_PASSWORD = window.CONFIG.ADMIN_PASSWORD;
         // ==========================================
 
         let supabaseClient = null;
