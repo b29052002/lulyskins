@@ -150,8 +150,7 @@ exports.handler = async (event, context) => {
                 .from('raffle_sales')
                 .update({ 
                     payment_status: 'approved',
-                    payment_id: payment.id,
-                    updated_at: new Date().toISOString()
+                    payment_id: payment.id
                 })
                 .eq('id', saleId)
                 .select();
