@@ -10,12 +10,3 @@ window.CONFIG = {
     // Admin
     ADMIN_PASSWORD: 'senhaluly123'
 };
-
-// ==========================================
-// 📝 COMO PROTEGER:
-// ==========================================
-// 1. TROQUE a SUPABASE_KEY (veja SEGURANCA_URGENTE.md)
-// 2. TROQUE a ADMIN_PASSWORD para algo forte
-// 3. NÃO commite este arquivo no Git
-// 4. Adicione "config.js" no .gitignore
-// ==========================================
