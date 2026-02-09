@@ -1533,38 +1533,36 @@ window.CONFIG_PROMISE.then((config) => {
             }, 500);
         }
 
-    window.openAdminPanel = async function () {
+   window.openAdminPanel = async function () {
     const password = prompt('🔐 Senha do administrador:');
     if (!password) return;
 
     try {
         const response = await fetch('/.netlify/functions/admin-login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })
         });
 
         const data = await response.json();
 
-        if (!response.ok || !data.success) {
+        if (!data.success) {
             alert('❌ Senha incorreta!');
             return;
         }
 
-        // Salva sessão
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminExpires', data.expiresAt);
 
         document.getElementById('adminPanel').classList.add('active');
         loadAdminData();
 
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error(err);
         alert('Erro ao conectar com o servidor');
     }
 };
+;
 
 
 
