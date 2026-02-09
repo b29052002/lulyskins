@@ -1566,40 +1566,53 @@ window.CONFIG_PROMISE.then((config) => {
     }
 };
 
+async function loadAdminData() {
+    if (!currentRaffle) {
+        document.getElementById('noRaffleWarning').style.display = 'block';
+        document.getElementById('btnSaveRaffle').style.display = 'none';
+        document.getElementById('btnFinishRaffle').style.display = 'none';
+        document.getElementById('btnCreateRaffle').style.display = 'inline-block';
+        document.getElementById('salesList').innerHTML =
+            '<p style="text-align: center; color: rgba(255,255,255,0.4);">Nenhuma venda</p>';
+        return;
+    }
 
+    document.getElementById('noRaffleWarning').style.display = 'none';
+    document.getElementById('btnSaveRaffle').style.display = 'inline-block';
+    document.getElementById('btnFinishRaffle').style.display = 'inline-block';
+    document.getElementById('btnCreateRaffle').style.display = 'none';
 
-            document.getElementById('noRaffleWarning').style.display = 'none';
-            document.getElementById('btnSaveRaffle').style.display = 'inline-block';
-            document.getElementById('btnFinishRaffle').style.display = 'inline-block';
-            document.getElementById('btnCreateRaffle').style.display = 'none';
+    document.getElementById('adminTitle').value = currentRaffle.title || '';
+    document.getElementById('adminDescription').value = currentRaffle.description || '';
+    document.getElementById('adminImage').value = currentRaffle.image_url || '';
+    document.getElementById('adminPrice').value = currentRaffle.price_per_number || '';
+    document.getElementById('adminTotalNumbers').value = currentRaffle.total_numbers || 100;
+    document.getElementById('adminMaxPerPerson').value = currentRaffle.max_per_person || 0;
+    document.getElementById('adminPromoEnabled').checked = currentRaffle.promo_enabled || false;
+    document.getElementById('adminPromoDiscount').value = currentRaffle.promo_discount || '';
+    document.getElementById('adminPromoMinNumbers').value = currentRaffle.promo_min_numbers || '';
 
-            document.getElementById('adminTitle').value = currentRaffle.title || '';
-            document.getElementById('adminDescription').value = currentRaffle.description || '';
-            document.getElementById('adminImage').value = currentRaffle.image_url || '';
-            document.getElementById('adminPrice').value = currentRaffle.price_per_number || '';
-            document.getElementById('adminTotalNumbers').value = currentRaffle.total_numbers || 100;
-            document.getElementById('adminMaxPerPerson').value = currentRaffle.max_per_person || 0;
-            document.getElementById('adminPromoEnabled').checked = currentRaffle.promo_enabled || false;
-            document.getElementById('adminPromoDiscount').value = currentRaffle.promo_discount || '';
-            document.getElementById('adminPromoMinNumbers').value = currentRaffle.promo_min_numbers || '';
+    if (currentRaffle.image_url) {
+        document.getElementById('previewImg').src = currentRaffle.image_url;
+        document.getElementById('imagePreview').style.display = 'block';
+    }
 
-            if (currentRaffle.image_url) {
-                document.getElementById('previewImg').src = currentRaffle.image_url;
-                document.getElementById('imagePreview').style.display = 'block';
-            }
+    togglePromoFields();
 
-            togglePromoFields();
-            await loadSales();
-            updateAdminStats();
+    // ⬇️ AGORA O AWAIT ESTÁ DENTRO DE FUNÇÃO ASYNC
+    await loadSales();
+    updateAdminStats();
 
-            if (window.adminUpdateInterval) {
-                clearInterval(window.adminUpdateInterval);
-            }
-            window.adminUpdateInterval = setInterval(async () => {
-                await loadSales();
-                updateAdminStats();
-            }, 10000);
-        }
+    // Atualização automática
+    if (window.adminUpdateInterval) {
+        clearInterval(window.adminUpdateInterval);
+    }
+
+    window.adminUpdateInterval = setInterval(async () => {
+        await loadSales();
+        updateAdminStats();
+    }, 10000);
+}
 
         function togglePromoFields() {
             const enabled = document.getElementById('adminPromoEnabled').checked;
