@@ -1,7 +1,9 @@
 const fetch = require('node-fetch');
-const ACCESS_TOKEN = 'APP_USR-2110354351670786-020516-b41ee554dbbbbc79c6a32ca9bb826019-44207380';
 
-exports.handler = async (event, context) => {
+// 🔒 Agora vem do Netlify (seguro)
+const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+
+exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -10,11 +12,7 @@ exports.handler = async (event, context) => {
     };
 
     if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 200,
-            headers,
-            body: ''
-        };
+        return { statusCode: 200, headers };
     }
 
     if (event.httpMethod !== 'POST') {
@@ -25,103 +23,103 @@ exports.handler = async (event, context) => {
         };
     }
 
+    // Verifica variável de ambiente
+    if (!ACCESS_TOKEN) {
+        console.error('MP_ACCESS_TOKEN não configurado');
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({ error: 'Server configuration error' })
+        };
+    }
+
     try {
         const paymentData = JSON.parse(event.body);
 
-        console.log('📥 Recebendo solicitação de pagamento:', {
-            amount: paymentData.transaction_amount,
-            description: paymentData.description,
-            external_reference: paymentData.external_reference
-        });
+        console.log('📥 Dados recebidos:', paymentData);
 
+        // ===== Validações básicas =====
         if (!paymentData.transaction_amount || paymentData.transaction_amount <= 0) {
             throw new Error('Valor inválido');
         }
 
         if (!paymentData.description) {
-            throw new Error('Descrição é obrigatória');
+            throw new Error('Descrição obrigatória');
         }
 
-        const mpPayload = {
-            transaction_amount: parseFloat(paymentData.transaction_amount),
-            description: paymentData.description,
-            payment_method_id: 'pix',
-            payer: {
-                email: paymentData.payer.email,
-                first_name: paymentData.payer.first_name,
-                last_name: paymentData.payer.last_name
-            }
+        // ===== GARANTE PAYER (aqui estava o problema) =====
+        const payer = paymentData.payer || {};
+
+        const payerData = {
+            email: payer.email || 'cliente@rifa.com',
+            first_name: payer.first_name || 'Cliente',
+            last_name: payer.last_name || 'Rifa'
         };
 
-        if (paymentData.notification_url) {
-            mpPayload.notification_url = paymentData.notification_url;
-        }
+        // ===== Payload Mercado Pago =====
+        const mpPayload = {
+            transaction_amount: Number(paymentData.transaction_amount),
+            description: paymentData.description,
+            payment_method_id: 'pix',
+            payer: payerData,
+            notification_url: paymentData.notification_url,
+            external_reference: paymentData.external_reference
+        };
 
-        if (paymentData.external_reference) {
-            mpPayload.external_reference = paymentData.external_reference;
-        }
-
-        console.log('📤 Enviando para Mercado Pago:', mpPayload);
+        console.log('📤 Enviando para MP:', mpPayload);
 
         const response = await fetch('https://api.mercadopago.com/v1/payments', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${ACCESS_TOKEN}`,
+                'Content-Type': 'application/json',
                 'X-Idempotency-Key': `${Date.now()}-${Math.random()}`
             },
             body: JSON.stringify(mpPayload)
         });
 
-        const responseData = await response.json();
+        const result = await response.json();
 
-        console.log('📥 Resposta do Mercado Pago:', {
-            status: response.status,
-            id: responseData.id,
-            status_payment: responseData.status
-        });
-
+        console.log('📥 Resposta MP:', result);
 
         if (!response.ok) {
-            console.error('❌ Erro do Mercado Pago:', responseData);
-            throw new Error(responseData.message || 'Erro ao criar pagamento');
+            console.error('❌ Erro Mercado Pago:', result);
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    error: result.message || 'Erro Mercado Pago',
+                    details: result
+                })
+            };
         }
 
+        const transactionData =
+            result.point_of_interaction?.transaction_data;
 
-        const pixData = {
-            id: responseData.id,
-            status: responseData.status,
-            qr_code: responseData.point_of_interaction?.transaction_data?.qr_code || null,
-            qr_code_base64: responseData.point_of_interaction?.transaction_data?.qr_code_base64 || null,
-            ticket_url: responseData.point_of_interaction?.transaction_data?.ticket_url || null
-        };
-
- 
-        if (!pixData.qr_code || !pixData.qr_code_base64) {
-            console.error('❌ QR Code não gerado:', responseData);
-            throw new Error('QR Code não foi gerado pelo Mercado Pago');
+        if (!transactionData?.qr_code) {
+            throw new Error('QR Code não retornado pelo Mercado Pago');
         }
-
-        console.log('✅ Pagamento PIX criado com sucesso!', {
-            payment_id: pixData.id,
-            has_qr_code: !!pixData.qr_code
-        });
 
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify(pixData)
+            body: JSON.stringify({
+                id: result.id,
+                qr_code: transactionData.qr_code,
+                qr_code_base64: transactionData.qr_code_base64,
+                ticket_url: transactionData.ticket_url
+            })
         };
 
     } catch (error) {
-        console.error('❌ Erro na function:', error);
-        
+        console.error('❌ Erro create-pix:', error);
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: error.message || 'Erro ao processar pagamento',
-                details: error.toString()
+                error: error.message
             })
         };
     }
