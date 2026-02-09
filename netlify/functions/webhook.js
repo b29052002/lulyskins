@@ -5,7 +5,6 @@ const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-// Validação de segurança
 if (!ACCESS_TOKEN || !SUPABASE_URL || !SUPABASE_KEY) {
     console.error('❌ Variáveis de ambiente não configuradas corretamente');
 }
