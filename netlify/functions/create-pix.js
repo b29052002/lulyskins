@@ -1,10 +1,7 @@
 const fetch = require('node-fetch');
-
-// Access Token do Mercado Pago
 const ACCESS_TOKEN = 'APP_USR-2110354351670786-020516-b41ee554dbbbbc79c6a32ca9bb826019-44207380';
 
 exports.handler = async (event, context) => {
-    // CORS Headers
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -12,7 +9,6 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/json'
     };
 
-    // Handle OPTIONS request (CORS preflight)
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
@@ -21,7 +17,6 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Only accept POST
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
@@ -31,7 +26,6 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // Parse request body
         const paymentData = JSON.parse(event.body);
 
         console.log('📥 Recebendo solicitação de pagamento:', {
@@ -40,7 +34,6 @@ exports.handler = async (event, context) => {
             external_reference: paymentData.external_reference
         });
 
-        // Validações
         if (!paymentData.transaction_amount || paymentData.transaction_amount <= 0) {
             throw new Error('Valor inválido');
         }
@@ -49,7 +42,6 @@ exports.handler = async (event, context) => {
             throw new Error('Descrição é obrigatória');
         }
 
-        // Preparar payload para Mercado Pago
         const mpPayload = {
             transaction_amount: parseFloat(paymentData.transaction_amount),
             description: paymentData.description,
@@ -61,19 +53,16 @@ exports.handler = async (event, context) => {
             }
         };
 
-        // Adicionar notification_url se fornecido
         if (paymentData.notification_url) {
             mpPayload.notification_url = paymentData.notification_url;
         }
 
-        // Adicionar external_reference se fornecido
         if (paymentData.external_reference) {
             mpPayload.external_reference = paymentData.external_reference;
         }
 
         console.log('📤 Enviando para Mercado Pago:', mpPayload);
 
-        // Fazer request para Mercado Pago API
         const response = await fetch('https://api.mercadopago.com/v1/payments', {
             method: 'POST',
             headers: {
@@ -92,13 +81,13 @@ exports.handler = async (event, context) => {
             status_payment: responseData.status
         });
 
-        // Verificar se houve erro
+
         if (!response.ok) {
             console.error('❌ Erro do Mercado Pago:', responseData);
             throw new Error(responseData.message || 'Erro ao criar pagamento');
         }
 
-        // Extrair dados do PIX
+
         const pixData = {
             id: responseData.id,
             status: responseData.status,
@@ -107,7 +96,7 @@ exports.handler = async (event, context) => {
             ticket_url: responseData.point_of_interaction?.transaction_data?.ticket_url || null
         };
 
-        // Verificar se QR Code foi gerado
+ 
         if (!pixData.qr_code || !pixData.qr_code_base64) {
             console.error('❌ QR Code não gerado:', responseData);
             throw new Error('QR Code não foi gerado pelo Mercado Pago');
