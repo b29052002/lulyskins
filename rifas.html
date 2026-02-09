@@ -1534,7 +1534,7 @@ window.CONFIG_PROMISE.then((config) => {
             }, 500);
         }
 
-        async function openAdminPanel() {
+    window.openAdminPanel = async function () {
     const password = prompt('🔐 Senha do administrador:');
     if (!password) return;
 
@@ -1554,20 +1554,19 @@ window.CONFIG_PROMISE.then((config) => {
             return;
         }
 
-        // Salvar sessão
-        localStorage.setItem('admin_token', data.token);
-        localStorage.setItem('admin_expires', data.expiresAt);
-
-        console.log('✅ Admin autenticado');
+        // Salva sessão
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminExpires', data.expiresAt);
 
         document.getElementById('adminPanel').classList.add('active');
         loadAdminData();
 
     } catch (error) {
-        console.error('Erro no login admin:', error);
-        alert('❌ Erro ao conectar com o servidor');
+        console.error(error);
+        alert('Erro ao conectar com o servidor');
     }
-}
+};
+
 
 
             document.getElementById('noRaffleWarning').style.display = 'none';
