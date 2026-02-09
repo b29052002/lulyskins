@@ -54,7 +54,6 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Buscar vendas APROVADAS
         const { data: sales, error: salesError } = await supabase
             .from('raffle_sales')
             .select('*')
@@ -93,14 +92,13 @@ exports.handler = async (event, context) => {
         txtContent += `Total de Números Vendidos: ${sortedNumbers.length}\n`;
         txtContent += `\n${'='.repeat(80)}\n\n`;
 
-        // Lista de números
+
         sortedNumbers.forEach(num => {
             txtContent += `${num} - ${numberToName[num]}\n`;
         });
 
         txtContent += `\n${'='.repeat(80)}\n\nRESUMO DE COMPRADORES:\n\n`;
 
-        // Resumo por comprador
         sales.forEach(sale => {
             const firstName = sale.buyer_name.split(' ')[0];
             txtContent += `${firstName}: ${sale.numbers.length} número(s) - ${sale.numbers.sort((a, b) => a - b).join(', ')}\n`;
