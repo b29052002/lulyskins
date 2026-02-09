@@ -1534,34 +1534,41 @@ window.CONFIG_PROMISE.then((config) => {
             }, 500);
         }
 
-        function openAdminPanel() {
-            const password = prompt('🔐 Senha do administrador:');
-            if (password !== ADMIN_PASSWORD) {
-                alert('❌ Senha incorreta!');
-                return;
-            }
+        async function openAdminPanel() {
+    const password = prompt('🔐 Senha do administrador:');
+    if (!password) return;
 
-            document.getElementById('adminPanel').classList.add('active');
-            loadAdminData();
+    try {
+        const response = await fetch('/.netlify/functions/admin-login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            alert('❌ Senha incorreta!');
+            return;
         }
 
-        function closeAdminPanel() {
-            document.getElementById('adminPanel').classList.remove('active');
-            
-            if (window.adminUpdateInterval) {
-                clearInterval(window.adminUpdateInterval);
-            }
-        }
+        // Salvar sessão
+        localStorage.setItem('admin_token', data.token);
+        localStorage.setItem('admin_expires', data.expiresAt);
 
-        async function loadAdminData() {
-            if (!currentRaffle) {
-                document.getElementById('noRaffleWarning').style.display = 'block';
-                document.getElementById('btnSaveRaffle').style.display = 'none';
-                document.getElementById('btnFinishRaffle').style.display = 'none';
-                document.getElementById('btnCreateRaffle').style.display = 'inline-block';
-                document.getElementById('salesList').innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.4);">Nenhuma venda</p>';
-                return;
-            }
+        console.log('✅ Admin autenticado');
+
+        document.getElementById('adminPanel').classList.add('active');
+        loadAdminData();
+
+    } catch (error) {
+        console.error('Erro no login admin:', error);
+        alert('❌ Erro ao conectar com o servidor');
+    }
+}
+
 
             document.getElementById('noRaffleWarning').style.display = 'none';
             document.getElementById('btnSaveRaffle').style.display = 'inline-block';
