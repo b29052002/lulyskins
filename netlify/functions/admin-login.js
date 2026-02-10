@@ -1,15 +1,12 @@
 const jwt = require('jsonwebtoken');
 
 exports.handler = async (event) => {
-  const { username, password } = JSON.parse(event.body || '{}');
+  const { password } = JSON.parse(event.body || '{}');
 
-  if (
-    username !== process.env.ADMIN_USER ||
-    password !== process.env.ADMIN_PASS
-  ) {
+  if (password !== process.env.ADMIN_PASS) {
     return {
       statusCode: 401,
-      body: JSON.stringify({ message: 'Credenciais inválidas' }),
+      body: JSON.stringify({ message: 'Senha inválida' }),
     };
   }
 
