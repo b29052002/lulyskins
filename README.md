@@ -1,2 +1,0 @@
-# lulyskins
-site luly skins
