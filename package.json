@@ -1,9 +1,0 @@
-{
-  "name": "luly-skins",
-  "version": "1.0.0",
-  "description": "Netlify Functions para sistema de rifas",
-  "dependencies": {
-    "mercadopago": "^2.0.15",
-    "@supabase/supabase-js": "^2.39.0"
-  }
-}
