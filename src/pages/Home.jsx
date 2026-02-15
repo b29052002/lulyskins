@@ -392,74 +392,113 @@ const scrollToHowItWorks = () => {
       {/* Sorteios Ativos */}
       <section className="py-20 px-4 bg-gradient-to-b from-transparent to-blue-900/10">
         <div className="container mx-auto">
+
           <div className="flex items-center justify-center space-x-3 mb-12">
             <h2 className="text-4xl font-bold text-white">SORTEIOS ATIVOS!</h2>
             <Ticket className="w-10 h-10 text-white animate-pulse" />
           </div>
-          
-          {raffles.length === 0 ? (
-            <div className="text-center py-12 bg-blue-900/20 rounded-xl border border-blue-600/30">
-              <p className="text-gray-300 text-lg">Nenhum sorteio ativo no momento. Fique de olho!</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {raffles.map((raffle) => (
-                <div
-                  key={raffle.id}
-                  className="bg-gradient-to-b from-blue-900/40 to-blue-950/40 border border-blue-600/30 rounded-xl overflow-hidden hover:border-blue-500 transition group"
-                >
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 bg-black/80 px-3 py-1 rounded text-xs font-bold text-white">
-                      RIFA
-                    </div>
-                    <div className="h-64 overflow-hidden">
-                      {/* ✅ Ajuste de campo: prize_image -> image_url (SEM mexer no layout) */}
-                      {raffle.image_url ? (
-                        <img 
-                          src={raffle.image_url} 
-                          alt={raffle.title} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
-                          <span className="text-6xl">🎯</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                      <div className="text-3xl font-black text-white mb-1">
-                        {/* ✅ Ajuste de campo: price -> price_per_number (SEM mexer no layout) */}
-                        R$ {Number(raffle.price_per_number ?? 0).toFixed(0)}
-                      </div>
-                      
-                    </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+
+            {/* RIFAS DINÂMICAS */}
+            {raffles.map((raffle) => (
+              <div
+                key={raffle.id}
+                className="bg-gradient-to-b from-blue-900/40 to-blue-950/40 border border-blue-600/30 rounded-xl overflow-hidden hover:border-blue-500 transition group"
+              >
+                <div className="relative">
+                  <div className="absolute top-3 left-3 bg-black/80 px-3 py-1 rounded text-xs font-bold text-white">
+                    RIFA
                   </div>
-                  <div className="p-6 bg-black/60">
-                    <h4 className="text-lg font-bold text-white mb-2">
-                      {raffle.title}
-                    </h4>
-                    {raffle.description && (
-                      <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                        {raffle.description}
-                      </p>
+
+                  <div className="h-64 overflow-hidden">
+                    {raffle.image_url ? (
+                      <img 
+                        src={raffle.image_url} 
+                        alt={raffle.title} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center">
+                        <span className="text-6xl">🎯</span>
+                      </div>
                     )}
-                    <Link
-                      to={createPageUrl('RaffleDetail') + `?id=${raffle.id}`}
-                      className="block text-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold"
-                    >
-                      PARTICIPAR
-                    </Link>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                    <div className="text-3xl font-black text-white mb-1">
+                      R$ {Number(raffle.price_per_number ?? 0).toFixed(0)}
+                    </div>
                   </div>
                 </div>
-              ))}
+
+                <div className="p-6 bg-black/60">
+                  <h4 className="text-lg font-bold text-white mb-2">
+                    {raffle.title}
+                  </h4>
+
+                  {raffle.description && (
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                      {raffle.description}
+                    </p>
+                  )}
+
+                  <Link
+                    to={createPageUrl('RaffleDetail') + `?id=${raffle.id}`}
+                    className="block text-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold"
+                  >
+                    PARTICIPAR
+                  </Link>
+                </div>
+              </div>
+            ))}
+
+            {/* 🔥 SORTEIO PERSONALIZADO FIXO */}
+            <div className="bg-gradient-to-b from-purple-900/40 to-pink-900/40 border border-purple-500/40 rounded-xl overflow-hidden hover:border-purple-400 transition group">
+
+              <div className="relative">
+                <div className="absolute top-3 left-3 bg-black/80 px-3 py-1 rounded text-xs font-bold text-white">
+                  SORTEIO ESPECIAL
+                </div>
+
+                <div className="h-64 overflow-hidden">
+                  <img
+                    src="https://i.imgur.com/W98r9hj.jpeg"
+                    alt="Sorteio Especial do Mês"
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-black/60">
+                <h4 className="text-lg font-bold text-white mb-2">
+                  Sorteio Especial do Mês
+                </h4>
+
+                <p className="text-purple-300 text-sm mb-4">
+                  Sorteio para quem depositar no CSGONET com código Luly!
+                </p>
+
+                <a
+                  href="https://forms.gle/NLZY4iVUwKNAcaNTA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:opacity-90 transition"
+                >
+                  PARTICIPAR
+                </a>
+              </div>
             </div>
-          )}
+
+          </div>
 
           <p className="text-center text-xs text-gray-400 mt-8 max-w-4xl mx-auto">
-            Este é um sistema de entretenimento baseado em sorte. Ao participar, você declara estar ciente de que a compra de cotas não configura investimento e que o valor pago não é reembolsável após a realização do sorteio, independente de decisões decorrentes ou não relacionadas ao evento, vogue por responsabilidade dos participantes menores de 18 anos.
+            Este é um sistema de entretenimento baseado em sorte. Ao participar, você declara estar ciente de que a compra de cotas não configura investimento e que o valor pago não é reembolsável após a realização do sorteio.
           </p>
+
         </div>
       </section>
+
 
       {/* Feedback dos Clientes */}
       <section className="py-20 px-4">
