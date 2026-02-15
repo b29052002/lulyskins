@@ -10,6 +10,18 @@ import { supabase } from '../lib/supabaseClient';
 export default function Home() {
   const [activeTab, setActiveTab] = useState('comprar');
 
+const howItWorksRef = useState(null);
+
+const scrollToHowItWorks = () => {
+  // opcional: atualiza o hash sem dar "pulo seco"
+  window.history.replaceState(null, "", "#como-funciona");
+
+  howItWorksRef.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+};
+
   // ✅ Mantive a mesma estrutura do authData, só trocando Base44 -> Supabase
   const { data: authData } = useQuery({
     queryKey: ['user'],
@@ -108,13 +120,15 @@ export default function Home() {
               <p className="text-lg text-gray-300 mb-8 leading-relaxed">
                 fazer parte da comunidade.
               </p>
-              <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold flex items-center space-x-2">
-                <a href="#como-funciona">
-  Quero saber mais
-</a>
-                
-                <ChevronDown className="w-5 h-5" />
-              </button>
+              <button
+  type="button"
+  onClick={scrollToHowItWorks}
+  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold flex items-center space-x-2 cursor-pointer select-none"
+  aria-label="Quero saber mais"
+>
+  <span>Quero saber mais</span>
+  <ChevronDown className="w-5 h-5" />
+</button>
             </div>
             <div className="flex justify-center lg:justify-end">
               <img 
@@ -150,7 +164,7 @@ export default function Home() {
       </section>
 
       {/* Como Funciona */}
-      <section id="como-funciona" className="py-20 px-4">
+      <section id="como-funciona" ref={howItWorksRef} className="py-20 px-4">
         <div className="container mx-auto">
           <h2 className="text-4xl font-bold text-white text-center mb-12">
             Como Funciona?
@@ -560,7 +574,7 @@ export default function Home() {
             
             <div className="flex justify-center space-x-6 mt-6">
               <a href="https://twitch.tv/lulyjoga" target="_blank" className="text-blue-400 hover:text-blue-300 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-twitch-icon lucide-twitch">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-twitch-icon lucide-twitch">
                 <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/>
                 </svg>
               </a>
