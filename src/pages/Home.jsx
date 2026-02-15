@@ -70,17 +70,10 @@ export default function Home() {
                 <Ticket className="w-4 h-4" />
                 <span>SORTEIOS</span>
               </Link>
-              <a href="https://twitch.tv/lulyjoga" target="_blank" className="flex items-center space-x-2 text-gray-400 hover:text-white transition">
-                <MessageCircle className="w-4 h-4" />
-                <span>TWITCH</span>
-              </a>
-              <a href="https://youtube.com/@lulyjoga" target="_blank" className="flex items-center space-x-2 text-gray-400 hover:text-white transition">
-                <Youtube className="w-4 h-4" />
-                <span>YOUTUBE</span>
-              </a>
+            
               <a href="https://wa.me/5511945149326" target="_blank" className="flex items-center space-x-2 text-gray-400 hover:text-white transition">
                 <MessageCircle className="w-4 h-4" />
-                <span>WHATSAPP</span>
+                <span>CONTATO</span>
               </a>
               <Link to={createPageUrl('AboutMe')} className="flex items-center space-x-2 text-gray-400 hover:text-white transition">
                 <Info className="w-4 h-4" />
@@ -268,7 +261,7 @@ export default function Home() {
                   <span className="text-white font-semibold">Você vai só aceitar a proposta e ficar tranquilo sabendo que vai receber o dinheiro no PIX.</span>
                 </p>
                 <a 
-                  href="https://wa.me/5511945149326" 
+                  href="https://wa.me" 
                   target="_blank"
                   className="inline-flex items-center space-x-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-semibold"
                 >
@@ -305,7 +298,7 @@ export default function Home() {
                   <span className="text-white font-semibold">Você entrega suas skins, paga a diferença e sai com a skin dos seus sonhos, tudo na mesma hora.</span>
                 </p>
                 <a 
-                  href="https://wa.me/5511945149326" 
+                  href="https://wa.me" 
                   target="_blank"
                   className="inline-flex items-center space-x-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-semibold"
                 >
@@ -353,7 +346,7 @@ export default function Home() {
                     <span>RIFAS</span>
                   </Link>
                   <a 
-                    href="https://wa.me/5511945149326" 
+                    href="https://wa.me" 
                     target="_blank"
                     className="inline-flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-semibold"
                   >
@@ -361,7 +354,7 @@ export default function Home() {
                     <span>FORMULÁRIO CSGONET</span>
                   </a>
                   <a 
-                    href="https://wa.me/5511945149326" 
+                    href="https://wa.me" 
                     target="_blank"
                     className="inline-flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-semibold"
                   >
@@ -464,7 +457,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-white font-semibold">@matheus_felippp</p>
-                  <a href="https://instagram.com/luly.skins" target="_blank" className="text-blue-400 text-xs hover:underline">
+                  <a href="https://instagram.com" target="_blank" className="text-blue-400 text-xs hover:underline">
                     Instagram
                   </a>
                 </div>
@@ -486,7 +479,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-white font-semibold">@eliasleysureforee</p>
-                  <a href="https://instagram.com/luly.skins" target="_blank" className="text-blue-400 text-xs hover:underline">
+                  <a href="https://instagram.com" target="_blank" className="text-blue-400 text-xs hover:underline">
                     Instagram
                   </a>
                 </div>
@@ -508,7 +501,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-white font-semibold">@marcelopi_</p>
-                  <a href="https://instagram.com/luly.skins" target="_blank" className="text-blue-400 text-xs hover:underline">
+                  <a href="https://instagram.com" target="_blank" className="text-blue-400 text-xs hover:underline">
                     Instagram
                   </a>
                 </div>
@@ -530,7 +523,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p className="text-white font-semibold">@_pablo_</p>
-                  <a href="https://instagram.com/luly.skins" target="_blank" className="text-blue-400 text-xs hover:underline">
+                  <a href="https://instagram.com" target="_blank" className="text-blue-400 text-xs hover:underline">
                     Instagram
                   </a>
                 </div>
