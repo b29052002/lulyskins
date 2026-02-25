@@ -47,13 +47,16 @@ export default function RaffleDetail() {
     queryKey: ["raffle", raffleId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("raffles")
-.select(`
-  *,
-  winner_user:users(name)
-`)
-.eq("id", raffleId)
-.single();
+  .from('raffles')
+  .select(`
+    *,
+    winner:users!raffles_winner_user_fkey (
+      id,
+      name
+    )
+  `)
+  .eq('id', raffleId)
+  .single();
 
       if (error) throw error;
       return data;
