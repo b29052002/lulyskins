@@ -480,7 +480,7 @@ const scrollToHowItWorks = () => {
                 </p>
 
                 <a
-                  href="https://forms.gle/NLZY4iVUwKNAcaNTA"
+                  href="https://forms.gle/Q3ENDdQvC4q2HTok9"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:opacity-90 transition"
